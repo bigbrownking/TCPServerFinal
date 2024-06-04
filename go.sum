@@ -1,0 +1,6 @@
+github.com/go-playground/ansi v2.1.0+incompatible h1:f9ldskdk1seTFmYjbmPaYB+WYsDKWc4UXcGb+e9JrN8=
+github.com/go-playground/ansi v2.1.0+incompatible/go.mod h1:OCdnfTFO/GfFtp+ktUt+PhElbGOwyTRUuRUsA+Y5pSU=
+github.com/go-playground/errors v3.3.0+incompatible h1:w7qP6bdFXNmI86aV8VEfhXrGxoQWYHc/OX4Muw4FgW0=
+github.com/go-playground/errors v3.3.0+incompatible/go.mod h1:n+RcthKmtLxDczVHKkhqiUSOGtTjvRl+HB4Gga0vWSI=
+github.com/go-playground/log v6.3.0+incompatible h1:CVT3y82/iLS65WJ4xfF8+SI6dxRdMiXpX+9surI/R2U=
+github.com/go-playground/log v6.3.0+incompatible/go.mod h1:3M1OvdKL8KYwOjJa3XM42iqzpvde2LHla8Ys0oz7Ma0=
