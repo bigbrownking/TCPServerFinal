@@ -6,4 +6,5 @@ require (
 	github.com/go-playground/ansi v2.1.0+incompatible // indirect
 	github.com/go-playground/errors v3.3.0+incompatible // indirect
 	github.com/go-playground/log v6.3.0+incompatible // indirect
+	github.com/sashabaranov/go-openai v1.24.1 // indirect
 )

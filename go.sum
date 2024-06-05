@@ -4,3 +4,5 @@ github.com/go-playground/errors v3.3.0+incompatible h1:w7qP6bdFXNmI86aV8VEfhXrGx
 github.com/go-playground/errors v3.3.0+incompatible/go.mod h1:n+RcthKmtLxDczVHKkhqiUSOGtTjvRl+HB4Gga0vWSI=
 github.com/go-playground/log v6.3.0+incompatible h1:CVT3y82/iLS65WJ4xfF8+SI6dxRdMiXpX+9surI/R2U=
 github.com/go-playground/log v6.3.0+incompatible/go.mod h1:3M1OvdKL8KYwOjJa3XM42iqzpvde2LHla8Ys0oz7Ma0=
+github.com/sashabaranov/go-openai v1.24.1 h1:DWK95XViNb+agQtuzsn+FyHhn3HQJ7Va8z04DQDJ1MI=
+github.com/sashabaranov/go-openai v1.24.1/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=

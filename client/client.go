@@ -2,23 +2,23 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"final_project/constants"
 	"fmt"
 	"github.com/go-playground/log"
-	"net"
 	"os"
 	"strings"
 	"time"
 )
 
 type Client struct {
-	conn       *net.TCPConn
+	conn       *tls.Conn
 	reader     *bufio.Reader
 	username   string
 	historyLog []string
 }
 
-func NewClient(conn *net.TCPConn, reader *bufio.Reader, username string) *Client {
+func NewClient(conn *tls.Conn, reader *bufio.Reader, username string) *Client {
 	return &Client{
 		conn:       conn,
 		reader:     reader,
@@ -28,7 +28,7 @@ func NewClient(conn *net.TCPConn, reader *bufio.Reader, username string) *Client
 }
 
 func (c *Client) Send(message string) error {
-	_, err := c.conn.Write([]byte(message))
+	_, err := c.conn.Write([]byte(message + "\n"))
 	if err != nil {
 		return err
 	}
@@ -45,13 +45,11 @@ func (c *Client) DisplayHistory() {
 }
 
 func main() {
-	tcpServer, err := net.ResolveTCPAddr(constants.TYPE, constants.HOST+":"+constants.PORT)
-	if err != nil {
-		fmt.Println("ResolveTCPAddr failed:", err)
-		os.Exit(1)
+	conf := &tls.Config{
+		InsecureSkipVerify: true,
 	}
 
-	conn, err := net.DialTCP("tcp", nil, tcpServer)
+	conn, err := tls.Dial(constants.TYPE, constants.HOST+":"+constants.PORT, conf)
 	if err != nil {
 		fmt.Println("Dial failed:", err)
 		os.Exit(1)
@@ -61,6 +59,7 @@ func main() {
 
 	fmt.Print("Enter your username: ")
 	username, _ := reader.ReadString('\n')
+	username = strings.TrimSpace(username)
 
 	client := NewClient(conn, reader, username)
 
@@ -76,31 +75,56 @@ func main() {
 	}
 	fmt.Print(welcome)
 
+	go func() {
+		for {
+			response, err := bufio.NewReader(conn).ReadString('\n')
+			if err != nil {
+				log.WithError(err).Error("Read response failed")
+				os.Exit(1)
+			} else if !strings.HasPrefix(response, "/status") {
+				fmt.Print(response)
+			}
+		}
+	}()
+
 	for {
 		text, _ := reader.ReadString('\n')
+		text = strings.TrimSpace(text)
 
-		if strings.TrimSpace(text) == "/history" {
+		if text == "/history" {
 			client.DisplayHistory()
 			continue
 		}
 
-		err = client.Send(text)
+		if text == "/exit" {
+			client.Send("/exit")
+			fmt.Println("Exiting...")
+			conn.Close()
+			os.Exit(0)
+		}
+
+		if text == "/status" {
+			client.Send("/status")
+			continue
+		}
+
+		if strings.HasPrefix(text, "/gpt ") {
+			client.Send(text)
+			continue
+		}
+
+		err = client.Send("/status typing")
 		if err != nil {
 			fmt.Println("Write data failed:", err)
 			os.Exit(1)
 		}
 
-		response, err := bufio.NewReader(conn).ReadString('\n')
-		if err != nil {
-			log.WithError(err).Error("Read response failed")
-			os.Exit(1)
-		}
-		fmt.Print(response)
+		time.Sleep(500 * time.Millisecond)
 
-		if strings.TrimSpace(text) == "/exit" {
-			fmt.Println("Exiting...")
-			conn.Close()
-			os.Exit(0)
+		err = client.Send(text)
+		if err != nil {
+			fmt.Println("Write data failed:", err)
+			os.Exit(1)
 		}
 
 		time.Sleep(1 * time.Second)
