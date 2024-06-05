@@ -11,15 +11,17 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
 type Client struct {
-	conn     net.Conn
-	username string
-	room     *ChatRoom
+	conn        net.Conn
+	username    string
+	room        *ChatRoom
+	connectedAt time.Time
 }
 
 type ChatRoom struct {
@@ -85,7 +87,7 @@ func handleRequest(conn net.Conn) {
 	username, _ := reader.ReadString('\n')
 	username = strings.TrimSpace(username)
 	conn.Write([]byte("Welcome to the server! Type \"/help\" to get a list of commands.\n"))
-	client := &Client{conn: conn, username: username}
+	client := &Client{conn: conn, username: username, connectedAt: time.Now()}
 
 	mu.Lock()
 	clients[conn] = client
@@ -254,11 +256,13 @@ func main() {
 		go handleRequest(conn)
 	}
 }
+
 func isBanned(ip string) bool {
 	mu.Lock()
 	defer mu.Unlock()
 	return bannedIPs[ip]
 }
+
 func findClientByUsername(username string) *Client {
 	for _, client := range clients {
 		if client.username == username {
@@ -267,6 +271,7 @@ func findClientByUsername(username string) *Client {
 	}
 	return nil
 }
+
 func broadcastMessage(message string, sender *Client) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -276,16 +281,18 @@ func broadcastMessage(message string, sender *Client) {
 		}
 	}
 }
+
 func adminPanelHandler(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	response := "Server Activity:\n"
 	for _, client := range clients {
-		response += "User: " + client.username + "\n"
+		duration := time.Since(client.connectedAt)
+		response += "User: " + client.username + " - Connected for: " + duration.String() + "\n"
 	}
 	for roomName, room := range rooms {
-		response += "Room: " + roomName + " - Users: " + string(len(room.clients)) + "\n"
+		response += "Room: " + roomName + " - Users: " + strconv.Itoa(len(room.clients)) + "\n"
 	}
 	w.Write([]byte(response))
 }
